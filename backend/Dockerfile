@@ -1,0 +1,14 @@
+
+FROM eclipse-temurin:21-jdk AS build
+WORKDIR /app
+
+COPY . .
+RUN chmod +x mvnw 2>/dev/null || true
+RUN if [ -f mvnw ]; then ./mvnw clean package -DskipTests; else apt-get update && apt-get install -y maven && mvn clean package -DskipTests; fi
+
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+COPY --from=build /app/target/smartqueue-1.0.0.jar app.jar
+
+EXPOSE 8080
+CMD ["java", "-jar", "app.jar"]
